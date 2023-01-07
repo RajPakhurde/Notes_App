@@ -1,6 +1,7 @@
 package com.rajpakhurde.notesapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,14 +10,19 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import com.rajpakhurde.notesapp.database.NoteDataBase
+import com.rajpakhurde.notesapp.entities.Notes
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CreateNoteFragment : Fragment() {
+class CreateNoteFragment : BaseFragment() {
 
     val etTitle = view?.findViewById<TextView>(R.id.etTitle)
     val etSubTitle = view?.findViewById<TextView>(R.id.etSubTitle)
     val etNoteDesc = view?.findViewById<TextView>(R.id.etNoteDesc)
+
+    var currentDate: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +58,7 @@ class CreateNoteFragment : Fragment() {
 
 
         val sdf = SimpleDateFormat("dd/M/yyyy mm:HH:ss")
-        val currentDate = sdf.format(Date())
+        currentDate = sdf.format(Date())
         tvDateTime.text = currentDate
 
         ivSaveBtn.setOnClickListener {
@@ -62,7 +68,6 @@ class CreateNoteFragment : Fragment() {
         ivBackBtn.setOnClickListener {
             replaceFragment(HomeFragment.newInstance(),true)
         }
-
     }
 
     fun replaceFragment(fragment: Fragment, isTransition: Boolean){
@@ -74,15 +79,32 @@ class CreateNoteFragment : Fragment() {
     }
 
     private fun saveNotes() {
-
-        if (etTitle?.text.isNullOrEmpty()){
+        if (etTitle?.text.isNullOrBlank()){
             Toast.makeText(context,"Note Title is Required.",Toast.LENGTH_SHORT).show()
         }
-        if (etSubTitle?.text.isNullOrEmpty()){
+        if (etSubTitle?.text.isNullOrBlank()){
             Toast.makeText(context,"Note Sub Title is Required.",Toast.LENGTH_SHORT).show()
         }
-        if (etNoteDesc?.text.isNullOrEmpty()){
+        if (etNoteDesc?.text.isNullOrBlank()){
             Toast.makeText(context,"Note Description is Required.",Toast.LENGTH_SHORT).show()
         }
+
+        launch {
+            var notes = Notes()
+            notes.title = etTitle?.text.toString()
+            notes.subTitle = etSubTitle?.text.toString()
+            notes.notetext = etNoteDesc?.text.toString()
+            notes.dateTime = currentDate
+            Log.i("TAG","Values to set to notes propeties")
+            context?.let {
+                Log.i("TAG","Enter in context scope..")
+                NoteDataBase.getDataBase(it).noteDao().insertNotes(notes)
+                Log.i("TAG","Data base created...")
+            }
+        }
+
+        etTitle?.text = ""
+        etSubTitle?.text = ""
+        etNoteDesc?.text = ""
     }
 }

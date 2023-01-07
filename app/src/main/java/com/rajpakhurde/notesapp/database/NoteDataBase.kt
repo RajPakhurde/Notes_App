@@ -1,6 +1,7 @@
 package com.rajpakhurde.notesapp.database
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -11,18 +12,20 @@ import com.rajpakhurde.notesapp.entities.Notes
 abstract class NoteDataBase: RoomDatabase() {
 
     companion object{
-        var noteDataBase: NoteDataBase? = null
-
-        @Synchronized
+        @Volatile
+        var INSTANCE: NoteDataBase? = null
         fun getDataBase(context: Context): NoteDataBase {
-            if(noteDataBase != null){
-                noteDataBase = Room.databaseBuilder(
-                    context,
-                    NoteDataBase::class.java,
-                    "notes_db"
-                ).build()
-            }
-            return noteDataBase!!
+             synchronized(this){
+                 var instance = INSTANCE
+                 if(instance == null){
+                     instance = Room.databaseBuilder(
+                         context.applicationContext,
+                         NoteDataBase::class.java,
+                         "room.db"
+                     ).build()
+                 }
+                 return instance
+             }
         }
     }
 
