@@ -11,6 +11,7 @@
     // new colors
     <color name="colorWhite">#FFFFFFFF</color>
     <color name="colorPrimary">#6200EE</color>
+    <color name="colorText">#81838B</color>
     <color name="colorDarkPrimary">#3700B3</color>
     <color name="colorLightBlack">#171C26</color>
     <color name="colorDarkBlack">#10141c</color>

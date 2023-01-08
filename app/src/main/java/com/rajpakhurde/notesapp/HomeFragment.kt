@@ -5,7 +5,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.rajpakhurde.notesapp.adapter.NoteAdapter
+import com.rajpakhurde.notesapp.database.NoteDataBase
+import kotlinx.coroutines.launch
 
 class HomeFragment : BaseFragment() {
 
@@ -36,6 +41,17 @@ class HomeFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val recyclerView = view.findViewById<RecyclerView>(R.id.rvMain)
+        recyclerView.hasFixedSize()
+        recyclerView.layoutManager = StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL)
+
+        launch {
+            context?.let {
+                var notes = NoteDataBase.getDataBase(it).noteDao().getAllNote()
+                recyclerView.adapter = NoteAdapter(notes)
+            }
+        }
 
         val fabAddBtn = view.findViewById<FloatingActionButton>(R.id.fabAdd)
         fabAddBtn.setOnClickListener {

@@ -12,15 +12,12 @@ import android.widget.TextView
 import android.widget.Toast
 import com.rajpakhurde.notesapp.database.NoteDataBase
 import com.rajpakhurde.notesapp.entities.Notes
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
 class CreateNoteFragment : BaseFragment() {
-
-    val etTitle = view?.findViewById<TextView>(R.id.etTitle)
-    val etSubTitle = view?.findViewById<TextView>(R.id.etSubTitle)
-    val etNoteDesc = view?.findViewById<TextView>(R.id.etNoteDesc)
 
     var currentDate: String? = null
 
@@ -56,13 +53,17 @@ class CreateNoteFragment : BaseFragment() {
         val ivBackBtn = view.findViewById<ImageView>(R.id.ivBackBtn)
         val ivSaveBtn = view.findViewById<ImageView>(R.id.ivSaveBtn)
 
+        val etTitle = view.findViewById<TextView>(R.id.etTitle)
+        val etSubTitle = view.findViewById<TextView>(R.id.etSubTitle)
+        val etNoteDesc = view.findViewById<TextView>(R.id.etNoteDesc)
 
-        val sdf = SimpleDateFormat("dd/M/yyyy mm:HH:ss")
+
+        val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
         currentDate = sdf.format(Date())
         tvDateTime.text = currentDate
 
         ivSaveBtn.setOnClickListener {
-            saveNotes()
+            saveNotes(etTitle,etSubTitle,etNoteDesc)
         }
 
         ivBackBtn.setOnClickListener {
@@ -78,33 +79,30 @@ class CreateNoteFragment : BaseFragment() {
         fragmentTransition.replace(R.id.flMain,fragment).addToBackStack(fragment.javaClass.simpleName).commit()
     }
 
-    private fun saveNotes() {
-        if (etTitle?.text.isNullOrBlank()){
+    private fun saveNotes(etTitle: TextView, etSubTitle: TextView, etNoteDesc: TextView) {
+        if (etTitle.text.isNullOrEmpty()){
             Toast.makeText(context,"Note Title is Required.",Toast.LENGTH_SHORT).show()
         }
-        if (etSubTitle?.text.isNullOrBlank()){
+        if (etSubTitle.text.isNullOrEmpty()){
             Toast.makeText(context,"Note Sub Title is Required.",Toast.LENGTH_SHORT).show()
         }
-        if (etNoteDesc?.text.isNullOrBlank()){
+        if (etNoteDesc.text.isNullOrEmpty()){
             Toast.makeText(context,"Note Description is Required.",Toast.LENGTH_SHORT).show()
         }
 
         launch {
             var notes = Notes()
-            notes.title = etTitle?.text.toString()
-            notes.subTitle = etSubTitle?.text.toString()
-            notes.notetext = etNoteDesc?.text.toString()
+            notes.title = etTitle.text.toString()
+            notes.subTitle = etSubTitle.text.toString()
+            notes.notetext = etNoteDesc.text.toString()
             notes.dateTime = currentDate
-            Log.i("TAG","Values to set to notes propeties")
+
             context?.let {
-                Log.i("TAG","Enter in context scope..")
                 NoteDataBase.getDataBase(it).noteDao().insertNotes(notes)
-                Log.i("TAG","Data base created...")
+                etSubTitle.text = ""
+                etNoteDesc.text = ""
+                etTitle.text = ""
             }
         }
-
-        etTitle?.text = ""
-        etSubTitle?.text = ""
-        etNoteDesc?.text = ""
     }
 }
